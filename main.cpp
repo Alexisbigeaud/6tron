@@ -4,31 +4,25 @@
  */
 
 //Récupérer la température et l'afficher sur la sortie standard
-#include "mbed.h";
-I2C i2c(I2C1_SDA, I2C1_SCL);
-const int addre7bit = 0x76;
-const int addr8bit = 0x76 << 1;
 
-namespace {
-#define PERIOD_MS 2000ms;
-}
+#include "mbed.h"
+#include "BME280.h" // Inclure la bibliothèque BME280
+using namespace sixtron;
+I2C bus(I2C1_SDA, I2C1_SCL); // Créer une instance de capteur BME280
 
-char data[3];
-int main(){
-	while (1)
-	{
-		data[0] = 0xD0;
-		i2c.write(addr8bit, data, 1);
-		i2c.read(addr8bit, data, 1);
-		printf("Chip ID: %x\n", data[0]);
-		ThisThread::sleep_for(500ms);
-		//température
-		data[0] = 0xFA;
-		data[1] = 0xFB;
-		data[2] = 0xFC;
-		i2c.write(addr8bit, data, 1);
-		i2c.read(addr8bit, data, 3);
-		printf("température: %x %x %x\n", data[0], data[1], data[2]);
-		ThisThread::sleep_for(500ms);
-	}
+
+int main() {
+	BME280 sensor(&bus);
+    sensor.initialize(); // Initialiser le capteur
+
+    while (1) {
+        float temperature;      
+		sensor.set_sampling(); // Mettre le capteur en mode normal
+
+        temperature = sensor.temperature();
+
+        printf("Température: %.2f°C\n", temperature);
+
+        ThisThread::sleep_for(500ms);
+    }
 }
