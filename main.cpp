@@ -16,12 +16,16 @@ int main() {
     sensor.initialize(); // Initialiser le capteur
 
     while (1) {
-        float temperature;      
+        float temperature, humidity, pressure;      
 		sensor.set_sampling(); // Mettre le capteur en mode normal
 
         temperature = sensor.temperature();
+		humidity = sensor.humidity();
+		pressure = sensor.pressure();
 
         printf("Température: %.2f°C\n", temperature);
+		printf("Humidité: %.2f%%\n", humidity);
+		printf("Pression: %.2fPa\n", pressure);
 
         ThisThread::sleep_for(500ms);
     }
