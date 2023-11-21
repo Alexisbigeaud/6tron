@@ -3,30 +3,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-//Récupérer la température et l'afficher sur la sortie standard
+
 
 #include "mbed.h"
-#include "BME280.h" // Inclure la bibliothèque BME280
-using namespace sixtron;
-I2C bus(I2C1_SDA, I2C1_SCL); // Créer une instance de capteur BME280
+DigitalOut led1(LED1);
+namespace{
+	#define PERIOD_MS 1000ms
+}
 
+void ping(){
+
+	for(int i = 0; i < 100; i++){
+		printf("ping\n");
+	}
+}
+
+void pong(){
+	for(int i = 0; i < 100; i++){
+		printf("pong\n");
+	}
+}
 
 int main() {
-	BME280 sensor(&bus);
-    sensor.initialize(); // Initialiser le capteur
 
-    while (1) {
-        float temperature, humidity, pressure;      
-		sensor.set_sampling(); // Mettre le capteur en mode normal
+	Thread ping_thread;
+	Thread pong_thread;
+	ping_thread.start(ping);
+	pong_thread.start(pong);
+	while(1){
+		led1 = !led1;
+		printf("Alive\n");
+		ThisThread::sleep_for(PERIOD_MS);
+	}
 
-        temperature = sensor.temperature();
-		humidity = sensor.humidity();
-		pressure = sensor.pressure();
 
-        printf("Température: %.2f°C\n", temperature);
-		printf("Humidité: %.2f%%\n", humidity);
-		printf("Pression: %.2fPa\n", pressure);
-
-        ThisThread::sleep_for(500ms);
-    }
 }
