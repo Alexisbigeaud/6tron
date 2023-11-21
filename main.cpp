@@ -2,32 +2,33 @@
  * Copyright (c) 2022, CATIE
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "mbed.h"
-InterruptIn button(BUTTON1);
-DigitalOut led(LED1);
-Ticker ticker;
+
+//Récupérer la température et l'afficher sur la sortie standard
+#include "mbed.h";
+I2C i2c(I2C1_SDA, I2C1_SCL);
+const int addre7bit = 0x76;
+const int addr8bit = 0x76 << 1;
+
 namespace {
-#define PERIOD_MS 2000ms
-}
-void toggleLED() {
-    led = !led;
+#define PERIOD_MS 2000ms;
 }
 
-void changeFrequency() {
-    static int frequency = 1;
-    ticker.detach();
-    ticker.attach(toggleLED, PERIOD_MS / frequency);
-    frequency *= 2;
-    if (frequency > 16) {
-        frequency = 1;
-    }
-}
-
-int main()
-{
-    button.rise(&changeFrequency);
-    ticker.attach(toggleLED, PERIOD_MS);
-    while (true) {
-        ThisThread::sleep_for(100ms);
-    }
+char data[3];
+int main(){
+	while (1)
+	{
+		data[0] = 0xD0;
+		i2c.write(addr8bit, data, 1);
+		i2c.read(addr8bit, data, 1);
+		printf("Chip ID: %x\n", data[0]);
+		ThisThread::sleep_for(500ms);
+		//température
+		data[0] = 0xFA;
+		data[1] = 0xFB;
+		data[2] = 0xFC;
+		i2c.write(addr8bit, data, 1);
+		i2c.read(addr8bit, data, 3);
+		printf("température: %x %x %x\n", data[0], data[1], data[2]);
+		ThisThread::sleep_for(500ms);
+	}
 }
